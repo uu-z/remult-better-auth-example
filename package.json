@@ -9,19 +9,26 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@types/node": "20.1.0",
-    "@types/react": "18.2.6",
-    "@types/react-dom": "18.2.4",
+    "@heroicons/react": "^2.2.0",
+    "@langchain/community": "^0.3.17",
+    "@langchain/core": "^0.3.20",
+    "@langchain/langgraph": "^0.2.24",
+    "@langchain/openai": "^0.3.14",
     "better-auth": "^1.1.17",
     "better-sqlite3": "^11.8.1",
+    "langchain": "^0.3.6",
+    "mobx": "^6.13.6",
     "next": "14.2.15",
-    "next-auth": "^4.24.7",
+    "openai": "^4.76.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "remult": "^0.26.12",
     "typescript": "5.0.4"
   },
   "devDependencies": {
+    "@types/node": "20.1.0",
+    "@types/react": "18.2.6",
+    "@types/react-dom": "18.2.4",
     "@types/better-sqlite3": "^7.6.12"
   }
 }

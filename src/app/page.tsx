@@ -1,45 +1,26 @@
-"use client"
-import { FormEvent, useEffect, useState } from "react"
-import { UserInfo, remult, repo} from "remult"
-import { Task } from "../shared/task"
-import { TasksController } from "../shared/tasksController"
-import { authClient } from "@/lib/client"
+"use client";
+import { FormEvent, useEffect, useState } from "react";
+import { UserInfo, remult, repo } from "remult";
+import { Task } from "../shared/task";
+import { TasksController } from "../shared/tasksController";
+import { authClient } from "@/lib/client";
+import { RemultStore } from "@/lib/mobx-remult/remult-store";
+import { observer } from "mobx-react-lite";
 
-const taskRepo = repo(Task)
+const taskStore = RemultStore.Get(Task);
 
-export default function Page() {
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [newTaskTitle, setNewTaskTitle] = useState("")
+const Page = observer(() => {
+  const session = authClient.useSession();
+  const user = session.data?.user;
+  const form = taskStore.useForm();
 
-  const session = authClient.useSession()
-
-  const user = session.data?.user
-
-  useEffect(() => {
-    console.log(session)
-      remult.user = {...session.data?.user, roles: [session.data?.user.role]} as UserInfo
-      return taskRepo
-        .liveQuery({
-          where: {
-            completed: undefined
-          }
-        })
-        .subscribe((info) => setTasks(info.applyChanges))
-  }, [session])
-
-
-  async function addTask(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    try {
-      const newTask = await taskRepo.insert({ title: newTaskTitle })
-      setNewTaskTitle("")
-    } catch (error: any) {
-      alert(error.message)
-    }
-  }
-
+  const { data: tasks } = taskStore.useLiveList({
+    where: {
+      completed: undefined,
+    },
+  });
   async function setAllCompleted(completed: boolean) {
-    await TasksController.setAllCompleted(completed)
+    await TasksController.setAllCompleted(completed);
   }
 
   return (
@@ -48,65 +29,53 @@ export default function Page() {
       <main>
         <div>
           Hello {user?.name}
-          {user ?
-            <button onClick={() => authClient.signOut()}>Sign Out</button> :
-            <button onClick={() => authClient.signIn.social({provider: "github"})}>Sign in</button>}
+          {user ? (
+            <button onClick={() => authClient.signOut()}>Sign Out</button>
+          ) : (
+            <button
+              onClick={() => authClient.signIn.social({ provider: "github" })}
+            >
+              Sign in
+            </button>
+          )}
         </div>
-        {taskRepo.metadata.apiInsertAllowed() && (
-          <form onSubmit={(e) => addTask(e)}>
+        {taskStore.metadata.apiInsertAllowed() && (
+          <form onSubmit={form.submit}>
             <input
-              value={newTaskTitle}
+              value={form.data?.title || ""}
               placeholder="What needs to be done?"
-              onChange={(e) => setNewTaskTitle(e.target.value)}
+              onChange={(e) => form.setField("title", e.target.value)}
             />
-            <button>Add</button>
+            {form.errors.title?.map((err) => (
+              <div key={err} style={{ color: "red" }}>
+                {err}
+              </div>
+            ))}
+            <button disabled={form.saving}>
+              {form.saving ? "Adding..." : "Add"}
+            </button>
           </form>
         )}
-        {tasks.map((task) => {
-          async function deleteTask() {
-            try {
-              await taskRepo.delete(task)
-              setTasks((tasks) => tasks.filter((t) => t !== task))
-            } catch (error: any) {
-              alert(error.message)
-            }
-          }
-          function setTask(value: Task) {
-            setTasks((tasks) => tasks.map((t) => (t === task ? value : t)))
-          }
-          async function setCompleted(completed: boolean) {
-            setTask(await taskRepo.save({ ...task, completed }))
-          }
-          function setTitle(title: string) {
-            setTask({ ...task, title })
-          }
-
-          async function doSaveTask() {
-            try {
-              setTask(await taskRepo.save(task))
-            } catch (error: any) {
-              alert(error.message)
-            }
-          }
-
-          return (
-            <div key={task.id}>
-              <input
-                type="checkbox"
-                checked={task.completed}
-                onChange={(e) => setCompleted(e.target.checked)}
-              />
-              <input
-                value={task.title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-              <button onClick={() => doSaveTask()}>Save</button>
-              {taskRepo.metadata.apiDeleteAllowed() && (
-                <button onClick={() => deleteTask()}>Delete</button>
-              )}
-            </div>
-          )
-        })}
+        {tasks?.map((task) => (
+          <div key={task.id}>
+            <input
+              type="checkbox"
+              checked={task.completed}
+              onChange={(e) => {
+                taskStore.update(task.id, { completed: e.target.checked });
+              }}
+            />
+            <input
+              value={task.title}
+              onChange={(e) => {
+                taskStore.update(task.id, { title: e.target.value });
+              }}
+            />
+            {taskStore.metadata.apiDeleteAllowed() && (
+              <button onClick={() => taskStore.delete(task.id)}>Delete</button>
+            )}
+          </div>
+        ))}
         <div>
           <button onClick={(e) => setAllCompleted(true)}>
             Set all completed
@@ -117,5 +86,7 @@ export default function Page() {
         </div>
       </main>
     </div>
-  )
-}
+  );
+});
+
+export default Page;
