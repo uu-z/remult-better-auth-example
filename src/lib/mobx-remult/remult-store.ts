@@ -318,7 +318,7 @@ export class RemultStore<T extends IBaseEntity<T>> {
             const item = await this.repository.insert(data);
 
             runInAction(() => {
-                this.state.list.data = [...this.state.list.data, item];
+                // this.state.list.data = Array.from(new Set([...this.state.list.data, item]));
                 this.state.list.total += 1;
                 this.state.list.loading = false;
             });

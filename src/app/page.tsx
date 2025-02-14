@@ -19,9 +19,13 @@ const Page = observer(() => {
       completed: undefined,
     },
   });
-  async function setAllCompleted(completed: boolean) {
-    await TasksController.setAllCompleted(completed);
-  }
+
+  useEffect(() => {
+    remult.user = {
+      ...session.data?.user,
+      roles: [session.data?.user.role],
+    } as UserInfo;
+  }, [session]);
 
   return (
     <div>
@@ -77,10 +81,10 @@ const Page = observer(() => {
           </div>
         ))}
         <div>
-          <button onClick={(e) => setAllCompleted(true)}>
+          <button onClick={(e) => TasksController.setAllCompleted(true)}>
             Set all completed
           </button>
-          <button onClick={(e) => setAllCompleted(false)}>
+          <button onClick={(e) => TasksController.setAllCompleted(false)}>
             Set all uncompleted
           </button>
         </div>
