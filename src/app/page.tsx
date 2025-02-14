@@ -12,9 +12,9 @@ const taskStore = RemultStore.Get(Task);
 const Page = observer(() => {
   const session = authClient.useSession();
   const user = session.data?.user;
-  const form = taskStore.useForm();
+  const form = taskStore.form.use();
 
-  const { data: tasks } = taskStore.useLiveList({
+  const { data: tasks } = taskStore.list.useLive({
     where: {
       completed: undefined,
     },
@@ -66,17 +66,19 @@ const Page = observer(() => {
               type="checkbox"
               checked={task.completed}
               onChange={(e) => {
-                taskStore.update(task.id, { completed: e.target.checked });
+                taskStore.list.update(task.id, { completed: e.target.checked });
               }}
             />
             <input
               value={task.title}
               onChange={(e) => {
-                taskStore.update(task.id, { title: e.target.value });
+                taskStore.list.update(task.id, { title: e.target.value });
               }}
             />
             {taskStore.metadata.apiDeleteAllowed() && (
-              <button onClick={() => taskStore.delete(task.id)}>Delete</button>
+              <button onClick={() => taskStore.list.delete(task.id)}>
+                Delete
+              </button>
             )}
           </div>
         ))}
