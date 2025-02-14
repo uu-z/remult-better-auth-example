@@ -1,7 +1,6 @@
 import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { Repository, FindOptions, LiveQuery, EntityFilter, FieldMetadata, ValueConverter } from 'remult';
 import { IBaseEntity, IListResult, IQueryOptions, LiveQueryCallback } from './types';
-import { debounce } from 'lodash-es';
 import { useEffect } from 'react';
 import { Debounce } from '../utils';
 
@@ -60,16 +59,18 @@ export class ListStore<T extends IBaseEntity<T>> {
     return query;
   }
 
-  liveQuery = debounce((opts, callback) => {
+  @Debounce(300)
+  liveQuery(opts: IQueryOptions<T>, callback: LiveQueryCallback<T> | undefined) {
     const query = this.buildQuery(opts);
     return this.repository.liveQuery(query).subscribe(async changes => {
       runInAction(() => {
         this.state.data = changes.items;
         this.setState({ loading: false })
       })
+      //@ts-ignore
       callback?.(changes);
     });
-  }, 300);
+  }
 
   useList(
     options?: Partial<IQueryOptions<T>>,
@@ -98,15 +99,14 @@ export class ListStore<T extends IBaseEntity<T>> {
 
   @Debounce(300)
   async list(options?: IQueryOptions<T>): Promise<IListResult<T>> {
-    this.setState({ loading: true })
+    this.setState({ loading: true });
 
     try {
       const query = this.buildQuery(options);
       const [items, total] = await Promise.all([
         this.repository.find(query),
         this.repository.count(query.where)
-      ])
-
+      ]);
 
       const result = {
         data: items,
@@ -117,10 +117,10 @@ export class ListStore<T extends IBaseEntity<T>> {
 
       runInAction(() => {
         Object.assign(this.state, result, { loading: false });
-      })
+      });
       return result;
     } catch (error) {
-      this.setState({ loading: false })
+      this.setState({ loading: false });
       throw error;
     }
   }

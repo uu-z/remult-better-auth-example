@@ -1,12 +1,12 @@
 [
   {
     "title": "test",
-    "completed": false,
+    "completed": true,
     "id": 2
   },
   {
     "title": "test1",
-    "completed": false,
+    "completed": true,
     "id": 8
   },
   {
@@ -16,7 +16,7 @@
   },
   {
     "title": "test123123",
-    "completed": false,
+    "completed": true,
     "id": 11
   },
   {
