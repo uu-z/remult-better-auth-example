@@ -3,6 +3,7 @@ import { Repository, FindOptions, LiveQuery, EntityFilter, FieldMetadata, ValueC
 import { IBaseEntity, IListResult, IQueryOptions, LiveQueryCallback } from './types';
 import { debounce } from 'lodash-es';
 import { useEffect } from 'react';
+import { Debounce } from '../utils';
 
 export class ListStore<T extends IBaseEntity<T>> {
   queryOptions: IQueryOptions<T> = {
@@ -95,6 +96,7 @@ export class ListStore<T extends IBaseEntity<T>> {
     };
   }
 
+  @Debounce(300)
   async list(options?: IQueryOptions<T>): Promise<IListResult<T>> {
     this.setState({ loading: true })
 
