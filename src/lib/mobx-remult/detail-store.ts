@@ -87,7 +87,7 @@ export class DetailStore<T extends IBaseEntity<T>> {
     }
   }
 
-  useLiveGet(id: string | number, callback?: LiveQueryCallback<T>) {
+  useLive(id: string | number, callback?: LiveQueryCallback<T>) {
     const queryKey = `detail_${id}`;
 
     useEffect(() => {
