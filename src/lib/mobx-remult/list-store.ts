@@ -1,208 +1,178 @@
-import { makeAutoObservable, runInAction } from 'mobx';
-import { Repository, FindOptions, LiveQuery } from 'remult';
+import { makeAutoObservable } from 'mobx';
+import { Repository, FindOptions, LiveQuery, EntityFilter, FieldMetadata, ValueConverter } from 'remult';
 import { IBaseEntity, IListResult, IQueryOptions, LiveQueryCallback } from './types';
+import { debounce } from 'lodash-es';
 import { useEffect } from 'react';
 
 export class ListStore<T extends IBaseEntity<T>> {
-  private liveQueries: Map<string, LiveQuery<T> & { unsubscribe?: VoidFunction }> = new Map();
-  private queryOptions: IQueryOptions<T> = {};
+  queryOptions: IQueryOptions<T> = {
+    page: 1,
+    pageSize: 10
+  };
 
   state = {
     data: [] as T[],
     total: 0,
-    page: 1,
-    pageSize: 10,
-    loading: false
+    loading: false,
   };
 
-  constructor(private repository: Repository<T>) {
+  constructor(
+    private repository: Repository<T>,
+  ) {
     makeAutoObservable(this);
   }
 
-  private getLiveQueryKey(options?: IQueryOptions<T>): string {
-    return JSON.stringify(options || {});
-  }
+  buildQuery(options?: IQueryOptions<T>) {
+    const { page = 1, pageSize = 10, searchText, where, orderBy, ...rest } = options || this.queryOptions;
 
-  private stopLiveQuery(key: string) {
-    const liveQuery = this.liveQueries.get(key);
-    if (liveQuery) {
-      liveQuery.unsubscribe?.();
-      this.liveQueries.delete(key);
+    const query: FindOptions<T> = {
+      ...rest,
+      limit: pageSize,
+      page,
+      orderBy
+    };
+
+    // Build search conditions
+    if (searchText) {
+      const fields = this.repository.metadata.fields as { [K in keyof T]: FieldMetadata<T, any> };
+      const searchableFields = Object.entries(fields)
+        .filter(([_, field]) => {
+          return field.dbName!!
+        })
+        .map(([key]) => key);
+
+
+      if (searchableFields.length > 0) {
+        const searchConditions = searchableFields.map(field => ({
+          [field]: { $contains: searchText }
+        }));
+
+        const searchFilter = { $or: searchConditions } as EntityFilter<T>;
+        console.log({ searchFilter })
+
+        query.where = where
+          ? { $and: [where, searchFilter] } as EntityFilter<T>
+          : searchFilter;
+      }
+    } else if (where) {
+      query.where = where;
     }
+
+    return query;
   }
 
-  async liveList(
-    options?: IQueryOptions<T>,
-    callback?: LiveQueryCallback<T>
-  ): Promise<IListResult<T>> {
-    const queryKey = this.getLiveQueryKey(options);
-    this.stopLiveQuery(queryKey);
-
-    runInAction(() => {
-      this.state.loading = true;
+  liveQuery = debounce((opts, callback) => {
+    const query = this.buildQuery(opts);
+    return this.repository.liveQuery(query).subscribe(async changes => {
+      this.state.data = changes.items;
+      this.state.loading = false;
+      callback?.(changes);
     });
+  }, 300);
 
-    try {
-      const { page = 1, pageSize = 10, ...rest } = options || {};
+  useList(
+    options?: Partial<IQueryOptions<T>>,
+    callback?: LiveQueryCallback<T>
+  ) {
+    this.setQuery(options as any);
 
-      const mergedOptions = {
-        ...this.queryOptions,
-        ...rest,
-        limit: pageSize,
-        page
-      };
+    useEffect(() => {
+      this.list(this.queryOptions);
+      if (options?.live) {
+        return this.liveQuery(this.queryOptions, callback);
+      }
+    }, [JSON.stringify(this.queryOptions)]);
 
-      const liveQuery = this.repository.liveQuery(mergedOptions);
-      this.liveQueries.set(queryKey, liveQuery);
-
-      liveQuery.subscribe(async changes => {
-        runInAction(() => {
-          this.state.data = changes.items;
-          this.state.loading = false;
-        });
-
-        //@ts-ignore
-        callback?.(changes);
-      });
-
-      const [items, total] = await Promise.all([
-        this.repository.find(mergedOptions),
-        this.repository.count(mergedOptions.where || {})
-      ]);
-
-      const result = {
-        data: items,
-        total,
-        page,
-        pageSize
-      };
-
-      runInAction(() => {
-        Object.assign(this.state, result, { loading: false });
-      });
-
-      return result;
-    } catch (error) {
-      runInAction(() => {
-        this.state.loading = false;
-      });
-      throw error;
-    }
+    return {
+      data: this.state.data,
+      loading: this.state.loading,
+      total: this.state.total,
+      page: this.queryOptions.page,
+      pageSize: this.queryOptions.pageSize,
+      searchText: this.queryOptions.searchText
+    };
   }
 
   async list(options?: IQueryOptions<T>): Promise<IListResult<T>> {
-    runInAction(() => {
-      this.state.loading = true;
-    });
+    this.state.loading = true;
 
     try {
-      const { page = 1, pageSize = 10, ...rest } = options || {};
-
-      const mergedOptions = {
-        ...this.queryOptions,
-        ...rest,
-        limit: pageSize,
-        page
-      };
-
+      const query = this.buildQuery(options);
       const [items, total] = await Promise.all([
-        this.repository.find(mergedOptions),
-        this.repository.count(mergedOptions.where || {})
-      ]);
+        this.repository.find(query),
+        this.repository.count(query.where)
+      ])
+
 
       const result = {
         data: items,
         total,
-        page,
-        pageSize
+        page: query.page!,
+        pageSize: query.limit!
       };
 
-      runInAction(() => {
-        Object.assign(this.state, result, { loading: false });
-      });
-
+      Object.assign(this.state, result, { loading: false });
       return result;
     } catch (error) {
-      runInAction(() => {
-        this.state.loading = false;
-      });
+      this.state.loading = false;
       throw error;
     }
   }
 
   async create(data: Partial<T>): Promise<T> {
-    runInAction(() => {
-      this.state.loading = true;
-    });
+    this.state.loading = true;
 
     try {
       const item = await this.repository.insert(data);
-
-      runInAction(() => {
-        this.state.total += 1;
-        this.state.loading = false;
-      });
-
+      this.state.total += 1;
+      this.state.loading = false;
       return item;
     } catch (error) {
-      runInAction(() => {
-        this.state.loading = false;
-      });
+      this.state.loading = false;
       throw error;
     }
   }
 
   async update(id: T['id'], data: Partial<T>): Promise<T> {
-    runInAction(() => {
-      this.state.loading = true;
-    });
+    this.state.loading = true;
 
     try {
       const item = await this.repository.update(id, data);
-
-      runInAction(() => {
-        this.state.data = this.state.data.map(d =>
-          d.id === id ? item : d
-        );
-        this.state.loading = false;
-      });
-
+      this.state.data = this.state.data.map(d =>
+        d.id === id ? item : d
+      );
+      this.state.loading = false;
       return item;
     } catch (error) {
-      runInAction(() => {
-        this.state.loading = false;
-      });
+      this.state.loading = false;
       throw error;
     }
   }
 
   async delete(id: T['id']): Promise<void> {
-    runInAction(() => {
-      this.state.loading = true;
-    });
+    this.state.loading = true;
 
     try {
       await this.repository.delete(id);
-
-      runInAction(() => {
-        this.state.data = this.state.data.filter(d => d.id !== id);
-        this.state.total -= 1;
-        this.state.loading = false;
-      });
+      this.state.data = this.state.data.filter(d => d.id !== id);
+      this.state.total -= 1;
+      this.state.loading = false;
     } catch (error) {
-      runInAction(() => {
-        this.state.loading = false;
-      });
+      this.state.loading = false;
       throw error;
     }
   }
 
-  async setPage(page: number): Promise<IListResult<T>> {
-    return this.list({ ...this.queryOptions, page });
+  setQuery(state: Partial<IQueryOptions<T>> = {}) {
+    if (state.searchText) {
+      state.page = 1
+    }
+    Object.assign(this.queryOptions, state);
+
   }
 
-  async setPageSize(pageSize: number): Promise<IListResult<T>> {
-    return this.list({ ...this.queryOptions, pageSize, page: 1 });
+  setState(state: Partial<IListResult<T>>) {
+    Object.assign(this.state, state);
   }
 
   async sort(orderBy: FindOptions<T>['orderBy']): Promise<IListResult<T>> {
@@ -216,29 +186,10 @@ export class ListStore<T extends IBaseEntity<T>> {
   }
 
   async reset(): Promise<IListResult<T>> {
-    this.queryOptions = {};
-    return this.list({ page: 1, pageSize: 10 });
-  }
-
-  useLive(options?: IQueryOptions<T>, callback?: LiveQueryCallback<T>) {
-    const queryKey = this.getLiveQueryKey(options);
-
-    useEffect(() => {
-      this.liveList(options, callback);
-      return () => this.stopLiveQuery(queryKey);
-    }, [queryKey]);
-
-    return {
-      data: this.state.data,
-      total: this.state.total,
-      page: this.state.page,
-      pageSize: this.state.pageSize,
-      loading: this.state.loading,
+    this.queryOptions = {
+      page: 1,
+      pageSize: 10
     };
-  }
-
-  stopAllLiveQueries() {
-    this.liveQueries.forEach(liveQuery => liveQuery.unsubscribe?.());
-    this.liveQueries.clear();
+    return this.list(this.queryOptions);
   }
 }

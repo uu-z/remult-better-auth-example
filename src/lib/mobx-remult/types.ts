@@ -1,27 +1,22 @@
-import { FindOptions, EntityFilter, LiveQueryChange } from 'remult';
+import { EntityFilter, FindOptions, LiveQueryChange, IdEntity } from 'remult';
 import { idType } from 'remult/src/remult3/remult3';
-
 export interface IBaseEntity<T> {
   id: idType<T>;
   [key: string]: any;
 }
-
-export interface IPagination {
-  page?: number;
-  pageSize?: number;
+export interface EntityType<T> {
+  new(...args: any[]): T;
 }
-
-export interface IQueryOptions<T> extends Partial<FindOptions<T>>, IPagination { }
-
 export interface IListResult<T> {
   data: T[];
   total: number;
+}
+
+export interface IQueryOptions<T> extends FindOptions<T> {
+  live?: boolean;
+  searchText?: string;
   page: number;
   pageSize: number;
 }
 
-export interface EntityType<T> {
-  new(...args: any[]): T;
-}
-
-export type LiveQueryCallback<T> = (change: LiveQueryChange) => void;
+export type LiveQueryCallback<T> = (changes: LiveQueryChange) => void;

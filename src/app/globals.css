@@ -1,73 +1,283 @@
-@charset "utf-8";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-body {
-  font-family: Arial;
-  background-color: whitesmoke;
-  justify-content: center;
-  margin: 0;
+@layer base {
+  :root {
+    /* 基础颜色定义 */
+    --foreground-rgb: 0, 0, 0;
+    --background-start-rgb: 214, 219, 220;
+    --background-end-rgb: 255, 255, 255;
+    
+    /* 自定义颜色变量 - 扩展调色板 */
+    --color-primary: 14, 165, 233;     /* 蓝色 */
+    --color-secondary: 168, 85, 247;   /* 紫色 */
+    --color-accent: 34, 197, 94;       /* 绿色 */
+    --color-neutral: 107, 114, 128;    /* 灰色 */
+
+    /* 文字排版 */
+    --font-size-base: 16px;
+    --line-height-base: 1.5;
+    --letter-spacing-base: 0.02em;
+
+    /* 间距 */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+
+    /* 圆角 */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --foreground-rgb: 255, 255, 255;
+      --background-start-rgb: 0, 0, 0;
+      --background-end-rgb: 0, 0, 0;
+      
+      /* 暗色模式颜色变量 - 更深、更柔和的色调 */
+      --color-primary: 59, 130, 246;   /* 更深的蓝色 */
+      --color-secondary: 124, 58, 237; /* 更深的紫色 */
+      --color-accent: 22, 163, 74;     /* 更深的绿色 */
+      --color-neutral: 75, 85, 99;     /* 更深的灰色 */
+    }
+  }
 }
 
-h1 {
-  color: #ef4444;
-  font-style: italic;
-  font-size: 3.75rem;
-  font-weight: inherit;
-  text-align: center;
+@layer base {
+  * {
+    @apply transition-colors duration-300 ease-in-out;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply 
+      min-h-screen 
+      antialiased 
+      text-base 
+      leading-relaxed 
+      tracking-wide 
+      bg-white 
+      dark:bg-gray-900 
+      text-gray-900 
+      dark:text-gray-100;
+    
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        rgb(var(--background-end-rgb))
+      )
+      rgb(var(--background-start-rgb));
+  }
+
+  /* 无障碍焦点样式 */
+  *:focus-visible {
+    @apply 
+      outline-none 
+      ring-2 
+      ring-blue-500 
+      dark:ring-blue-400 
+      rounded-md;
+  }
+
+  /* 选择文本样式 */
+  ::selection {
+    @apply 
+      bg-blue-100 
+      dark:bg-blue-800 
+      text-gray-900 
+      dark:text-white;
+  }
 }
 
-main {
-  max-width: 500px;
-  min-width: 300px;
-  margin: auto;
-  background-color: white;
-  box-sizing: border-box;
-  border: 1px solid lightgray;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px #0003, 0 25px 50px #0000001a;
+@layer components {
+  /* 滚动条样式 */
+  ::-webkit-scrollbar {
+    @apply w-2 bg-gray-100 dark:bg-gray-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply 
+      bg-gray-300 
+      dark:bg-gray-600 
+      rounded-full 
+      hover:bg-gray-400 
+      dark:hover:bg-gray-500;
+  }
+
+  /* 链接样式 */
+  .link {
+    @apply 
+      text-blue-600 
+      dark:text-blue-400 
+      hover:text-blue-800 
+      dark:hover:text-blue-300 
+      transition-colors 
+      duration-300 
+      ease-in-out 
+      underline 
+      decoration-2 
+      underline-offset-4;
+  }
+
+  /* 按钮基础样式 */
+  .btn {
+    @apply 
+      inline-flex 
+      items-center 
+      justify-center 
+      px-4 
+      py-2 
+      rounded-md 
+      font-medium 
+      transition-all 
+      duration-300 
+      ease-in-out 
+      focus:outline-none 
+      focus:ring-2 
+      focus:ring-offset-2 
+      disabled:opacity-50 
+      disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply 
+      bg-primary-500 
+      text-white 
+      hover:bg-primary-600 
+      focus:ring-primary-500 
+      dark:bg-primary-600 
+      dark:hover:bg-primary-700;
+  }
+
+  .btn-secondary {
+    @apply 
+      bg-secondary-500 
+      text-white 
+      hover:bg-secondary-600 
+      focus:ring-secondary-500 
+      dark:bg-secondary-600 
+      dark:hover:bg-secondary-700;
+  }
+
+  .btn-outline {
+    @apply 
+      border 
+      border-gray-300 
+      dark:border-gray-600 
+      bg-transparent 
+      text-gray-700 
+      dark:text-gray-300 
+      hover:bg-gray-50 
+      dark:hover:bg-gray-800 
+      focus:ring-gray-300 
+      dark:focus:ring-gray-600;
+  }
+
+  /* 表单输入样式 */
+  .input {
+    @apply 
+      w-full 
+      px-3 
+      py-2 
+      border 
+      border-gray-300 
+      dark:border-gray-600 
+      rounded-md 
+      bg-white 
+      dark:bg-gray-800 
+      text-gray-900 
+      dark:text-gray-100 
+      focus:outline-none 
+      focus:ring-2 
+      focus:ring-blue-500 
+      dark:focus:ring-blue-400 
+      transition-all 
+      duration-300;
+  }
+
+  /* 卡片基础样式 */
+  .card {
+    @apply 
+      bg-white 
+      dark:bg-gray-800 
+      shadow-md 
+      rounded-lg 
+      border 
+      border-gray-200 
+      dark:border-gray-700 
+      p-4 
+      transition-all 
+      duration-300 
+      hover:shadow-lg;
+  }
+
+  /* 间距和排版工具类 */
+  .section {
+    @apply py-12 px-4 sm:px-6 lg:px-8;
+  }
+
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
 }
 
-main>div,
-main>form {
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid lightgray;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  justify-content: space-between;
+@layer utilities {
+  /* 文本截断 */
+  .text-truncate {
+    @apply overflow-hidden whitespace-nowrap text-ellipsis;
+  }
+
+  /* 可访问的隐藏 */
+  .sr-only {
+    @apply absolute w-px h-px p-0 m-[-1px] overflow-hidden whitespace-nowrap border-0;
+  }
+
+  /* 动画工具类 */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
 }
 
-main>div:has(input[type='checkbox']) {
-  justify-content: inherit;
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
-input {
-  font-family: inherit;
-  font-size: 100%;
-  width: 100%;
-  border: 0;
+@keyframes slideUp {
+  0% { 
+    transform: translateY(20px); 
+    opacity: 0; 
+  }
+  100% { 
+    transform: translateY(0); 
+    opacity: 1; 
+  }
 }
 
-input:checked+input {
-  text-decoration: line-through;
+/* 打印样式 */
+@media print {
+  body {
+    @apply bg-white text-black;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
 }
 
-input:placeholder-shown {
-  font-style: italic;
-}
-
-input[type='checkbox'] {
-  width: 36px;
-  height: 36px;
-  height: 1.5rem;
-}
-
-button {
-  cursor: pointer;
-  padding: 0.5rem 0.5rem;
-  background-color: white;
-  font-family: inherit;
-  font-size: 85%;
-  line-height: inherit;
-  border: 2px solid #0000001a;
-  border-radius: 0.5rem;
+/* 减少动作偏好 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
 }

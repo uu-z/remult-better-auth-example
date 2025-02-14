@@ -16,19 +16,29 @@
     "@langchain/openai": "^0.3.14",
     "better-auth": "^1.1.17",
     "better-sqlite3": "^11.8.1",
+    "fuse.js": "^7.1.0",
     "langchain": "^0.3.6",
+    "lodash-es": "^4.17.21",
     "mobx": "^6.13.6",
+    "mobx-react-lite": "^4.1.0",
     "next": "14.2.15",
     "openai": "^4.76.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-use": "^17.6.0",
     "remult": "^0.26.12",
-    "typescript": "5.0.4"
+    "typescript": "5.0.4",
+    "use-debounce": "^10.0.4"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.6",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/lodash-es": "^4.17.12",
     "@types/node": "20.1.0",
     "@types/react": "18.2.6",
     "@types/react-dom": "18.2.4",
-    "@types/better-sqlite3": "^7.6.12"
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.2",
+    "tailwindcss": "^3.x"
   }
 }

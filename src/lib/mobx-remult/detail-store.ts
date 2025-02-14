@@ -4,7 +4,6 @@ import { IBaseEntity, LiveQueryCallback } from './types';
 import { useEffect } from 'react';
 
 export class DetailStore<T extends IBaseEntity<T>> {
-  private liveQueries: Map<string, LiveQuery<T> & { unsubscribe?: VoidFunction }> = new Map();
 
   state = {
     data: null as T | null,
@@ -15,54 +14,34 @@ export class DetailStore<T extends IBaseEntity<T>> {
     makeAutoObservable(this);
   }
 
-  private stopLiveQuery(key: string) {
-    const liveQuery = this.liveQueries.get(key);
-    if (liveQuery) {
-      liveQuery.unsubscribe?.();
-      this.liveQueries.delete(key);
-    }
-  }
 
-  async liveGet(
+  useLive(
     id: string | number,
     callback?: LiveQueryCallback<T>
-  ): Promise<T | null> {
-    const queryKey = `detail_${id}`;
-    this.stopLiveQuery(queryKey);
+  ): VoidFunction {
 
     runInAction(() => {
       this.state.loading = true;
     });
 
-    try {
-      const options: any = { where: { id } };
-      const liveQuery = this.repository.liveQuery(options);
-      this.liveQueries.set(queryKey, liveQuery);
+    const options: any = { where: { id } };
+    const liveQuery = this.repository.liveQuery(options);
 
-      liveQuery.subscribe(changes => {
-        runInAction(() => {
-          this.state.data = changes.items[0] || null;
-          this.state.loading = false;
-        });
 
-        //@ts-ignore
-        callback?.(changes);
-      });
-
-      const item = await this.repository.findFirst(options);
-
-      runInAction(() => {
-        this.state.data = item;
-        this.state.loading = false;
-      });
-
-      return item;
-    } catch (error) {
-      runInAction(() => {
-        this.state.loading = false;
-      });
-      throw error;
+    if (!this.state.data) {
+      this.get(options)
     }
+
+    return liveQuery.subscribe(changes => {
+      runInAction(() => {
+        this.state.data = changes.items[0] || null;
+        this.state.loading = false;
+      });
+
+      //@ts-ignore
+      callback?.(changes);
+    });
+
   }
 
   async get(where: EntityFilter<T>): Promise<T | null> {
@@ -87,22 +66,5 @@ export class DetailStore<T extends IBaseEntity<T>> {
     }
   }
 
-  useLive(id: string | number, callback?: LiveQueryCallback<T>) {
-    const queryKey = `detail_${id}`;
 
-    useEffect(() => {
-      this.liveGet(id, callback);
-      return () => this.stopLiveQuery(queryKey);
-    }, [id]);
-
-    return {
-      data: this.state.data,
-      loading: this.state.loading,
-    };
-  }
-
-  stopAllLiveQueries() {
-    this.liveQueries.forEach(liveQuery => liveQuery.unsubscribe?.());
-    this.liveQueries.clear();
-  }
 }

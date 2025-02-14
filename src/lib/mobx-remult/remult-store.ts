@@ -31,8 +31,4 @@ export class RemultStore<T extends IBaseEntity<T>> extends BaseStore<T> {
     return this.instances.get(entityType)!;
   }
 
-  stopAllLiveQueries() {
-    this.list.stopAllLiveQueries();
-    this.detail.stopAllLiveQueries();
-  }
 }
