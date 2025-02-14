@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { Repository, FindOptions, LiveQuery, EntityFilter, FieldMetadata, ValueConverter } from 'remult';
 import { IBaseEntity, IListResult, IQueryOptions, LiveQueryCallback } from './types';
 import { debounce } from 'lodash-es';
@@ -23,10 +23,10 @@ export class ListStore<T extends IBaseEntity<T>> {
   }
 
   buildQuery(options?: IQueryOptions<T>) {
-    const { page = 1, pageSize = 10, searchText, where, orderBy, ...rest } = options || this.queryOptions;
+    const { page = 1, pageSize = 10, searchText, where, orderBy } = options!
 
     const query: FindOptions<T> = {
-      ...rest,
+      where,
       limit: pageSize,
       page,
       orderBy
@@ -35,6 +35,7 @@ export class ListStore<T extends IBaseEntity<T>> {
     // Build search conditions
     if (searchText) {
       const fields = this.repository.metadata.fields as { [K in keyof T]: FieldMetadata<T, any> };
+
       const searchableFields = Object.entries(fields)
         .filter(([_, field]) => {
           return field.dbName!!
@@ -48,14 +49,11 @@ export class ListStore<T extends IBaseEntity<T>> {
         }));
 
         const searchFilter = { $or: searchConditions } as EntityFilter<T>;
-        console.log({ searchFilter })
 
         query.where = where
           ? { $and: [where, searchFilter] } as EntityFilter<T>
           : searchFilter;
       }
-    } else if (where) {
-      query.where = where;
     }
 
     return query;
@@ -64,8 +62,10 @@ export class ListStore<T extends IBaseEntity<T>> {
   liveQuery = debounce((opts, callback) => {
     const query = this.buildQuery(opts);
     return this.repository.liveQuery(query).subscribe(async changes => {
-      this.state.data = changes.items;
-      this.state.loading = false;
+      runInAction(() => {
+        this.state.data = changes.items;
+        this.state.loading = false;
+      })
       callback?.(changes);
     });
   }, 300);
@@ -74,12 +74,14 @@ export class ListStore<T extends IBaseEntity<T>> {
     options?: Partial<IQueryOptions<T>>,
     callback?: LiveQueryCallback<T>
   ) {
-    this.setQuery(options as any);
+    useEffect(() => {
+      this.setQuery(options as any);
+    }, [])
 
     useEffect(() => {
       this.list(this.queryOptions);
-      if (options?.live) {
-        return this.liveQuery(this.queryOptions, callback);
+      if (this.queryOptions.live) {
+        return this.liveQuery(this.queryOptions, callback)
       }
     }, [JSON.stringify(this.queryOptions)]);
 
@@ -89,7 +91,7 @@ export class ListStore<T extends IBaseEntity<T>> {
       total: this.state.total,
       page: this.queryOptions.page,
       pageSize: this.queryOptions.pageSize,
-      searchText: this.queryOptions.searchText
+      searchText: this.queryOptions.searchText,
     };
   }
 
@@ -111,7 +113,9 @@ export class ListStore<T extends IBaseEntity<T>> {
         pageSize: query.limit!
       };
 
-      Object.assign(this.state, result, { loading: false });
+      runInAction(() => {
+        Object.assign(this.state, result, { loading: false });
+      })
       return result;
     } catch (error) {
       this.state.loading = false;
@@ -164,11 +168,12 @@ export class ListStore<T extends IBaseEntity<T>> {
   }
 
   setQuery(state: Partial<IQueryOptions<T>> = {}) {
-    if (state.searchText) {
-      state.page = 1
-    }
-    Object.assign(this.queryOptions, state);
-
+    runInAction(() => {
+      if (state.searchText || state.pageSize) {
+        state.page = 1
+      }
+      Object.assign(this.queryOptions, state);
+    })
   }
 
   setState(state: Partial<IListResult<T>>) {

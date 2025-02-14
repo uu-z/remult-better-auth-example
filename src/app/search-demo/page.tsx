@@ -14,7 +14,7 @@ const SearchDemoPage = observer(() => {
     page,
     pageSize,
     searchText,
-  } = productStore.list.useList();
+  } = productStore.list.useList({});
 
   const totalPages = Math.ceil(total / pageSize);
 

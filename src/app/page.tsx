@@ -14,7 +14,7 @@ const Page = observer(() => {
   const user = session.data?.user;
   const form = taskStore.form.use();
 
-  const { data: tasks, loading } = taskStore.list.useList({
+  const { data: tasks } = taskStore.list.useList({
     live: true,
     where: { completed: undefined },
   });

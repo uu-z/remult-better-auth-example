@@ -1,4 +1,4 @@
-import { EntityFilter, FindOptions, LiveQueryChange, IdEntity } from 'remult';
+import { EntityFilter, FindOptions, LiveQueryChange, IdEntity, EntityOrderBy } from 'remult';
 import { idType } from 'remult/src/remult3/remult3';
 export interface IBaseEntity<T> {
   id: idType<T>;
@@ -13,7 +13,9 @@ export interface IListResult<T> {
 }
 
 export interface IQueryOptions<T> extends FindOptions<T> {
-  live?: boolean;
+  live?: boolean
+  where?: EntityFilter<T>
+  orderBy?: EntityOrderBy<T>
   searchText?: string;
   page: number;
   pageSize: number;
