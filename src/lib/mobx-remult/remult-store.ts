@@ -123,7 +123,7 @@ export class RemultStore<T extends IBaseEntity<T>> {
 
                 runInAction(() => {
                     this.state.list.data = changes.items;
-                    this.state.list.total = total;
+                    // this.state.list.total = total;
                     this.state.list.loading = false;
                 });
 
