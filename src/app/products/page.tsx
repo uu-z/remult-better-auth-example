@@ -86,7 +86,10 @@ const SearchDemoPage = observer(() => {
                     {products.map((product: Product) => (
                       <tr
                         key={product.id}
-                        className="hover:bg-gray-50 transition-colors duration-200"
+                        onClick={() =>
+                          (window.location.href = `/products/${product.id}`)
+                        }
+                        className="hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
                       >
                         <td className="px-4 py-3">{product.name}</td>
                         <td className="px-4 py-3">{product.category}</td>

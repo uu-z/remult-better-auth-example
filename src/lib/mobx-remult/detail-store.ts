@@ -1,10 +1,11 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { Repository, EntityFilter, LiveQuery } from 'remult';
+import { Repository, EntityFilter, LiveQuery, FindFirstOptions } from 'remult';
 import { IBaseEntity, LiveQueryCallback } from './types';
 import { useEffect } from 'react';
 
-export class DetailStore<T extends IBaseEntity<T>> {
 
+
+export class DetailStore<T extends IBaseEntity<T>> {
   state = {
     data: null as T | null,
     loading: false
@@ -15,42 +16,37 @@ export class DetailStore<T extends IBaseEntity<T>> {
   }
 
 
-  useLive(
-    id: string | number,
-    callback?: LiveQueryCallback<T>
-  ): VoidFunction {
+  use({ id, live }: { id: string | number, live?: boolean }, callback?: LiveQueryCallback<T>) {
 
-    runInAction(() => {
-      this.state.loading = true;
-    });
+    useEffect(() => {
+      const options: any = { where: { id } };
 
-    const options: any = { where: { id } };
-    const liveQuery = this.repository.liveQuery(options);
+      this.get(options);
+      if (live) {
+        const liveQuery = this.repository.liveQuery(options);
+        return liveQuery.subscribe(changes => {
+          runInAction(() => {
+            this.state.data = changes.items[0] || null;
+            this.state.loading = false;
+          });
+          //@ts-ignore
+          callback?.(changes);
+        });
+      }
+    }, [id]);
 
-
-    if (!this.state.data) {
-      this.get(options)
-    }
-
-    return liveQuery.subscribe(changes => {
-      runInAction(() => {
-        this.state.data = changes.items[0] || null;
-        this.state.loading = false;
-      });
-
-      //@ts-ignore
-      callback?.(changes);
-    });
-
+    return {
+      data: this.state.data,
+      loading: this.state.loading,
+    };
   }
 
-  async get(where: EntityFilter<T>): Promise<T | null> {
+  async get(args: { where: EntityFilter<T>, options?: FindFirstOptions<T> }): Promise<T | null> {
     runInAction(() => {
       this.state.loading = true;
     });
-
     try {
-      const item = await this.repository.findFirst(where);
+      const item = await this.repository.findFirst(args.where, args.options);
 
       runInAction(() => {
         this.state.data = item;
@@ -65,6 +61,4 @@ export class DetailStore<T extends IBaseEntity<T>> {
       throw error;
     }
   }
-
-
 }
