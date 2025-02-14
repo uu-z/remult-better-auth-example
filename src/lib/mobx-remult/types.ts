@@ -10,6 +10,7 @@ export interface EntityType<T> {
 export interface IListResult<T> {
   data: T[];
   total: number;
+  loading?: boolean
 }
 
 export interface IQueryOptions<T> extends FindOptions<T> {

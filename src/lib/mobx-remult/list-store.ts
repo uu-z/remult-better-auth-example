@@ -64,7 +64,7 @@ export class ListStore<T extends IBaseEntity<T>> {
     return this.repository.liveQuery(query).subscribe(async changes => {
       runInAction(() => {
         this.state.data = changes.items;
-        this.state.loading = false;
+        this.setState({ loading: false })
       })
       callback?.(changes);
     });
@@ -96,7 +96,7 @@ export class ListStore<T extends IBaseEntity<T>> {
   }
 
   async list(options?: IQueryOptions<T>): Promise<IListResult<T>> {
-    this.state.loading = true;
+    this.setState({ loading: true })
 
     try {
       const query = this.buildQuery(options);
@@ -118,51 +118,52 @@ export class ListStore<T extends IBaseEntity<T>> {
       })
       return result;
     } catch (error) {
-      this.state.loading = false;
+      this.setState({ loading: false })
       throw error;
     }
   }
 
   async create(data: Partial<T>): Promise<T> {
-    this.state.loading = true;
+    this.setState({ loading: true })
 
     try {
       const item = await this.repository.insert(data);
       this.state.total += 1;
-      this.state.loading = false;
+      this.setState({ loading: true })
       return item;
     } catch (error) {
-      this.state.loading = false;
+      this.setState({ loading: false })
       throw error;
     }
   }
 
   async update(id: T['id'], data: Partial<T>): Promise<T> {
-    this.state.loading = true;
-
+    this.setState({ loading: false })
     try {
       const item = await this.repository.update(id, data);
-      this.state.data = this.state.data.map(d =>
-        d.id === id ? item : d
-      );
-      this.state.loading = false;
+      runInAction(() => {
+        this.state.data = this.state.data.map(d =>
+          d.id === id ? item : d
+        );
+      })
+      this.setState({ loading: false })
       return item;
     } catch (error) {
-      this.state.loading = false;
+      this.setState({ loading: false })
       throw error;
     }
   }
 
   async delete(id: T['id']): Promise<void> {
-    this.state.loading = true;
+    this.setState({ loading: true })
 
     try {
       await this.repository.delete(id);
       this.state.data = this.state.data.filter(d => d.id !== id);
       this.state.total -= 1;
-      this.state.loading = false;
+      this.setState({ loading: false })
     } catch (error) {
-      this.state.loading = false;
+      this.setState({ loading: false })
       throw error;
     }
   }
