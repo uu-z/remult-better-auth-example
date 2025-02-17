@@ -2,37 +2,30 @@ import { makeAutoObservable, runInAction } from 'mobx'
 import { ObjectPool, WeakWrap } from '../utils'
 import { useEffect } from 'react'
 
-export type AsyncFunction<P extends any[] = any[], R = any> = (...args: P) => Promise<R>;
-
 export interface RequestState<T> {
-    data: T | null;
+    data: T extends { data: infer D } ? D : T | null;
     loading: boolean;
     error: Error | null;
 }
 
-export type AsyncMethodResult<T extends AsyncFunction> = {
-    call: T;
-    use: (...args: Parameters<T>) => RequestState<Awaited<ReturnType<T>>>;
-}
+type AsyncMethod<T> = T extends (...args: infer P) => Promise<infer R> ? {
+    call: (...args: P) => Promise<R>;
+    use: (...args: P) => RequestState<R>;
+} : never;
 
-type IsFunction<T> = T extends (...args: any[]) => any ? T : never;
-type IsObject<T> = T extends object ? T : never;
-
-export type ProxifiedObject<T> = {
-    [K in keyof T]: T[K] extends IsFunction<T[K]>
-    ? AsyncMethodResult<T[K]>
-    : T[K] extends IsObject<T[K]>
+type ProxifiedObject<T> = {
+    [K in keyof T]: T[K] extends (...args: any[]) => Promise<any>
+    ? AsyncMethod<T[K]>
+    : T[K] extends object
     ? ProxifiedObject<T[K]>
     : T[K];
 }
 
-
-
-class RequestStore<T extends AsyncFunction> {
-    data: Awaited<ReturnType<T>> = {};
+class RequestStore<T extends (...args: any[]) => Promise<any>> {
+    data: Awaited<ReturnType<T>> | null = null;
     loading = false;
     error: Error | null = null;
-    fn: T
+    fn: T;
     authClient: any;
 
     constructor(args: Partial<RequestStore<T>>) {
@@ -48,7 +41,6 @@ class RequestStore<T extends AsyncFunction> {
             const result = await this.fn(...args);
             runInAction(() => {
                 this.data = result.data
-                console.log(this.data)
             });
             return result;
         } catch (err) {
@@ -76,14 +68,8 @@ class RequestStore<T extends AsyncFunction> {
             error: this.error
         };
     }
-
-    hooks = {
-        //@ts-ignore
-        call: (...args: any[]) => this.execute(...args),
-        //@ts-ignore
-        use: (...args: any[]) => this.use(...args)
-    }
 }
+
 export function BetterAuthProxy<T extends object>(sdk: T): ProxifiedObject<T> {
     return new Proxy(sdk, {
         get(t1: any, p1: string) {
@@ -92,27 +78,19 @@ export function BetterAuthProxy<T extends object>(sdk: T): ProxifiedObject<T> {
                 return new Proxy(t1[p1], {
                     get: function (t2: any, p2: string) {
                         if (['use', 'call'].includes(p2)) {
-                            const store = ObjectPool.get(`$${p1}.${p2}`, () => new RequestStore({ fn, authClient: sdk }))
-                            //@ts-ignore
+                            const store = ObjectPool.get(`${p1}.${p2}`, () => new RequestStore({ fn, authClient: sdk }))
                             return (...args: any[]) => store.use(...args)
                         }
                         const fn2 = t2[p2]
-                        const store = ObjectPool.get(`$${p1}.${p2}`, () => new RequestStore({ fn: fn2, authClient: sdk }))
+                        const store = ObjectPool.get(`${p1}.${p2}`, () => new RequestStore({ fn: fn2, authClient: sdk }))
                         return {
-                            //@ts-ignore
                             call: (...args: any[]) => store.execute(...args),
-                            //@ts-ignore
                             use: (...args: any[]) => store.use(...args)
                         }
                     },
                 })
             }
-
-            if (typeof t1[p1] === 'object' && t1[p1] !== null) {
-                return BetterAuthProxy(t1[p1])
-            }
-
             return t1[p1]
         }
-    })
+    }) as ProxifiedObject<T>
 }

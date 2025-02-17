@@ -18,7 +18,7 @@ const Page = observer(() => {
 
   const users = auth.listSessions.use({});
   //@ts-ignore
-  const seesions = auth.admin.listUserSessions.use({ userId: user?.id });
+  const listUsers = auth.admin.listUsers.use();
 
   const { data: tasks } = taskStore.list.useList({
     live: true,
@@ -40,7 +40,7 @@ const Page = observer(() => {
             Todo List
           </h1>
           <pre>{JSON.stringify(users, null, 2)}</pre>
-          <pre>{JSON.stringify(seesions, null, 2)}</pre>
+          <pre>{JSON.stringify(listUsers.data?.users, null, 2)}</pre>
 
           <div className="mt-4 flex justify-between items-center">
             <p className="text-gray-600 dark:text-gray-300">
