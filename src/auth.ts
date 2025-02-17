@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { memoryAdapter } from "better-auth/adapters/memory"
-import { admin } from "better-auth/plugins"
+import { admin, organization } from "better-auth/plugins"
 
 export const auth = betterAuth({
     // TODO: change to postgres
@@ -18,6 +18,7 @@ export const auth = betterAuth({
         }
     },
     plugins: [
-        admin()
+        admin({ defaultRole: "admin" }),
+        organization()
     ]
 })

@@ -4,8 +4,6 @@ import { BaseStore } from './base-store';
 import { ListStore } from './list-store';
 import { DetailStore } from './detail-store';
 import { FormStore } from './form-store';
-import { makeAutoObservable } from 'mobx';
-
 export class RemultStore<T extends IBaseEntity<T>> extends BaseStore<T> {
   list: ListStore<T>;
   detail: DetailStore<T>;

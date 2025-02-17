@@ -6,13 +6,19 @@ import { TasksController } from "../shared/tasksController";
 import { authClient } from "@/lib/client";
 import { RemultStore } from "@/lib/mobx-remult/remult-store";
 import { observer } from "mobx-react-lite";
+import { MobxProxy } from "@/lib/mobx-better-auth";
 
 const taskStore = RemultStore.Get(Task);
+const auth = MobxProxy(authClient);
 
 const Page = observer(() => {
   const session = authClient.useSession();
   const user = session.data?.user;
   const form = taskStore.form.use();
+
+  const users = auth.listSessions.use({});
+  //@ts-ignore
+  const seesions = auth.admin.listUserSessions.use({ userId: user?.id });
 
   const { data: tasks } = taskStore.list.useList({
     live: true,
@@ -33,6 +39,9 @@ const Page = observer(() => {
           <h1 className="text-2xl font-bold text-primary-700 dark:text-primary-300">
             Todo List
           </h1>
+          <pre>{JSON.stringify(users, null, 2)}</pre>
+          <pre>{JSON.stringify(seesions, null, 2)}</pre>
+
           <div className="mt-4 flex justify-between items-center">
             <p className="text-gray-600 dark:text-gray-300">
               {user ? `Hello, ${user.name}` : "Welcome, Guest"}
