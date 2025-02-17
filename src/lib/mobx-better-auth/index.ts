@@ -37,7 +37,6 @@ class RequestStore<T extends AsyncFunction> {
 
     constructor(args: Partial<RequestStore<T>>) {
         Object.assign(this, args)
-        console.log(123)
         makeAutoObservable(this);
     }
 
