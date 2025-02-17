@@ -6,10 +6,10 @@ import { TasksController } from "../shared/tasksController";
 import { authClient } from "@/lib/client";
 import { RemultStore } from "@/lib/mobx-remult/remult-store";
 import { observer } from "mobx-react-lite";
-import { MobxProxy } from "@/lib/mobx-better-auth";
+import { BetterAuthProxy } from "@/lib/mobx-better-auth";
 
 const taskStore = RemultStore.Get(Task);
-const auth = MobxProxy(authClient);
+const auth = BetterAuthProxy(authClient);
 
 const Page = observer(() => {
   const session = authClient.useSession();

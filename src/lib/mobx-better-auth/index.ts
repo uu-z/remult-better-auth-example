@@ -85,7 +85,7 @@ class RequestStore<T extends AsyncFunction> {
         use: (...args: any[]) => this.use(...args)
     }
 }
-export function MobxProxy<T extends object>(sdk: T): ProxifiedObject<T> {
+export function BetterAuthProxy<T extends object>(sdk: T): ProxifiedObject<T> {
     return new Proxy(sdk, {
         get(t1: any, p1: string) {
             if (typeof t1[p1] === 'function') {
@@ -110,7 +110,7 @@ export function MobxProxy<T extends object>(sdk: T): ProxifiedObject<T> {
             }
 
             if (typeof t1[p1] === 'object' && t1[p1] !== null) {
-                return MobxProxy(t1[p1])
+                return BetterAuthProxy(t1[p1])
             }
 
             return t1[p1]
