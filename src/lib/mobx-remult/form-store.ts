@@ -24,6 +24,7 @@ export class FormStore<T extends IBaseEntity<T>> {
     });
   }
 
+
   setFormField<K extends keyof T>(field: K, value: T[K]) {
     runInAction(() => {
       if (!this.state.data) {

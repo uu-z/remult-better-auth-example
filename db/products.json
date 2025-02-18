@@ -7,37 +7,41 @@
     "stock": 150,
     "description": "降噪无线蓝牙耳机，支持触控操作和长续航",
     "brand": "TechWave",
-    "imageUrl": "/images/bluetooth-headphones.jpg"
+    "imageUrl": "/images/bluetooth-headphones.jpg",
+    "inStock": false
   },
   {
     "id": 2,
     "name": "轻薄笔记本电脑",
     "category": "电脑",
-    "price": 5999.0,
+    "price": 5999,
     "stock": 50,
     "description": "13英寸轻薄本，M2芯片，8核CPU，512GB SSD",
     "brand": "ApplePro",
-    "imageUrl": "/images/laptop.jpg"
+    "imageUrl": "/images/laptop.jpg",
+    "inStock": false
   },
   {
     "id": 3,
     "name": "智能手表",
     "category": "可穿戴设备",
-    "price": 1499.0,
+    "price": 1499,
     "stock": 100,
     "description": "心率监测、GPS定位、防水设计",
     "brand": "HealthTrack",
-    "imageUrl": "/images/smartwatch.jpg"
+    "imageUrl": "/images/smartwatch.jpg",
+    "inStock": false
   },
   {
     "id": 4,
     "name": "4K智能电视",
     "category": "家电",
-    "price": 3299.0,
+    "price": 3299,
     "stock": 75,
     "description": "55英寸OLED屏幕，杜比视界，智能语音控制",
     "brand": "CrystalView",
-    "imageUrl": "/images/4k-tv.jpg"
+    "imageUrl": "/images/4k-tv.jpg",
+    "inStock": false
   },
   {
     "id": 5,
@@ -47,336 +51,348 @@
     "stock": 200,
     "description": "快速充电，多设备兼容，支持15W功率",
     "brand": "PowerBoost",
-    "imageUrl": "/images/wireless-charger.jpg"
+    "imageUrl": "/images/wireless-charger.jpg",
+    "inStock": false
   },
   {
     "id": 6,
     "name": "便携蓝牙音箱",
     "category": "音频",
-    "price": 399.0,
+    "price": 399,
     "stock": 120,
     "description": "户外防水，24小时续航，立体声效果",
     "brand": "SoundWave",
-    "imageUrl": "/images/bluetooth-speaker.jpg"
+    "imageUrl": "/images/bluetooth-speaker.jpg",
+    "inStock": false
   },
   {
     "id": 7,
     "name": "智能空气净化器",
     "category": "家居",
-    "price": 1799.0,
+    "price": 1799,
     "stock": 80,
     "description": "HEPA滤网，PM2.5检测，智能APP控制",
     "brand": "PureAir",
-    "imageUrl": "/images/air-purifier.jpg"
+    "imageUrl": "/images/air-purifier.jpg",
+    "inStock": false
   },
   {
     "id": 8,
     "name": "电动剃须刀",
     "category": "个人护理",
-    "price": 599.0,
+    "price": 599,
     "stock": 90,
     "description": "全身水洗，5D浮动刀头，快速充电",
     "brand": "SmartShave",
-    "imageUrl": "/images/electric-shaver.jpg"
-  },
-  {
-    "id": 9,
-    "name": "运动智能手环",
-    "category": "可穿戴设备",
-    "price": 299.0,
-    "stock": 180,
-    "description": "心率监测，睡眠分析，GPS运动轨迹",
-    "brand": "FitPro",
-    "imageUrl": "/images/fitness-band.jpg"
-  },
-  {
-    "id": 10,
-    "name": "便携咖啡机",
-    "category": "厨房电器",
-    "price": 1299.0,
-    "stock": 60,
-    "description": "15Bar压力，触屏操作，一键制作拿铁",
-    "brand": "CoffeeMax",
-    "imageUrl": "/images/coffee-machine.jpg"
+    "imageUrl": "/images/electric-shaver.jpg",
+    "inStock": false
   },
   {
     "id": 11,
     "name": "智能扫地机器人",
     "category": "家居",
-    "price": 2499.0,
+    "price": 2499,
     "stock": 40,
     "description": "激光导航，自动回充，APP远程控制",
     "brand": "CleanBot",
-    "imageUrl": "/images/robot-vacuum.jpg"
+    "imageUrl": "/images/robot-vacuum.jpg",
+    "inStock": false
   },
   {
     "id": 12,
     "name": "无线降噪耳机",
     "category": "音频",
-    "price": 1099.0,
+    "price": 1099,
     "stock": 110,
     "description": "主动降噪，触控操作，30小时续航",
     "brand": "SoundSilence",
-    "imageUrl": "/images/noise-cancelling-headphones.jpg"
+    "imageUrl": "/images/noise-cancelling-headphones.jpg",
+    "inStock": false
   },
   {
     "id": 13,
     "name": "智能台灯",
     "category": "家居照明",
-    "price": 399.0,
+    "price": 399,
     "stock": 130,
     "description": "RGB调色，语音控制，护眼模式",
     "brand": "LightSmart",
-    "imageUrl": "/images/smart-lamp.jpg"
+    "imageUrl": "/images/smart-lamp.jpg",
+    "inStock": false
   },
   {
     "id": 14,
     "name": "电动牙刷",
     "category": "个人护理",
-    "price": 29.0,
+    "price": 29,
     "stock": 200,
     "description": "声波清洁，多模式刷头，长效电池",
     "brand": "DentalPro",
-    "imageUrl": "/images/electric-toothbrush.jpg"
+    "imageUrl": "/images/electric-toothbrush.jpg",
+    "inStock": false
   },
   {
     "id": 15,
     "name": "便携投影仪",
     "category": "电子产品",
-    "price": 1599.0,
+    "price": 1599,
     "stock": 70,
     "description": "1080P高清，智能系统，无线投屏",
     "brand": "MiniCine",
-    "imageUrl": "/images/portable-projector.jpg"
+    "imageUrl": "/images/portable-projector.jpg",
+    "inStock": false
   },
   {
     "id": 16,
     "name": "智能体脂秤",
     "category": "健康",
-    "price": 249.0,
+    "price": 249,
     "stock": 160,
     "description": "精准测量体重、体脂率，APP同步",
     "brand": "BodyTrack",
-    "imageUrl": "/images/smart-scale.jpg"
+    "imageUrl": "/images/smart-scale.jpg",
+    "inStock": false
   },
   {
     "id": 17,
     "name": "电动剪发器",
     "category": "个人护理",
-    "price": 199.0,
+    "price": 199,
     "stock": 100,
     "description": "陶瓷刀头，长续航，多档位调节",
     "brand": "HairCut",
-    "imageUrl": "/images/hair-clipper.jpg"
+    "imageUrl": "/images/hair-clipper.jpg",
+    "inStock": false
   },
   {
     "id": 18,
     "name": "智能门锁",
     "category": "智能家居",
-    "price": 1299.0,
+    "price": 1299,
     "stock": 50,
     "description": "指纹识别，远程开锁，历史记录追踪",
     "brand": "SecureSmart",
-    "imageUrl": "/images/smart-lock.jpg"
+    "imageUrl": "/images/smart-lock.jpg",
+    "inStock": false
   },
   {
     "id": 19,
     "name": "便携充电宝",
     "category": "配件",
-    "price": 129.0,
+    "price": 129,
     "stock": 250,
     "description": "10000mAh，快充PD协议，多设备充电",
     "brand": "PowerBank",
-    "imageUrl": "/images/power-bank.jpg"
+    "imageUrl": "/images/power-bank.jpg",
+    "inStock": false
   },
   {
     "id": 20,
     "name": "智能温度计",
     "category": "健康",
-    "price": 9.0,
+    "price": 9,
     "stock": 180,
     "description": "红外测温，精准快速，APP记录",
     "brand": "TempSmart",
-    "imageUrl": "/images/digital-thermometer.jpg"
+    "imageUrl": "/images/digital-thermometer.jpg",
+    "inStock": false
   },
   {
     "id": 21,
     "name": "无线鼠标",
     "category": "电脑配件",
-    "price": 199.0,
+    "price": 199,
     "stock": 140,
     "description": "人体工学设计，静音按键，可充电",
     "brand": "ErgoMouse",
-    "imageUrl": "/images/wireless-mouse.jpg"
+    "imageUrl": "/images/wireless-mouse.jpg",
+    "inStock": false
   },
   {
     "id": 22,
     "name": "智能加湿器",
     "category": "家居",
-    "price": 499.0,
+    "price": 499,
     "stock": 90,
     "description": "超声波雾化，智能湿度控制，静音设计",
     "brand": "MoistAir",
-    "imageUrl": "/images/smart-humidifier.jpg"
+    "imageUrl": "/images/smart-humidifier.jpg",
+    "inStock": false
   },
   {
     "id": 23,
     "name": "便携蒸汽熨斗",
     "category": "家居电器",
-    "price": 299.0,
+    "price": 299,
     "stock": 110,
     "description": "快速加热，多档位调节，便携设计",
     "brand": "SteamPress",
-    "imageUrl": "/images/portable-steamer.jpg"
+    "imageUrl": "/images/portable-steamer.jpg",
+    "inStock": false
   },
   {
     "id": 24,
     "name": "智能血压计",
     "category": "健康",
-    "price": 349.0,
+    "price": 349,
     "stock": 80,
     "description": "精准测量，APP同步，多用户记录",
     "brand": "PressurePro",
-    "imageUrl": "/images/blood-pressure-monitor.jpg"
+    "imageUrl": "/images/blood-pressure-monitor.jpg",
+    "inStock": false
   },
   {
     "id": 25,
     "name": "无线键盘",
     "category": "电脑配件",
-    "price": 399.0,
+    "price": 399,
     "stock": 100,
     "description": "机械键盘，背光，多设备连接",
     "brand": "KeyMaster",
-    "imageUrl": "/images/wireless-keyboard.jpg"
+    "imageUrl": "/images/wireless-keyboard.jpg",
+    "inStock": false
   },
   {
     "id": 26,
     "name": "智能窗帘电机",
     "category": "智能家居",
-    "price": 799.0,
+    "price": 799,
     "stock": 60,
     "description": "静音设计，语音控制，APP远程操作",
     "brand": "CurtainSmart",
-    "imageUrl": "/images/smart-curtain-motor.jpg"
+    "imageUrl": "/images/smart-curtain-motor.jpg",
+    "inStock": false
   },
   {
     "id": 27,
     "name": "便携榨汁机",
     "category": "厨房电器",
-    "price": 299.0,
+    "price": 299,
     "stock": 120,
     "description": "小型便携，多功能榨汁，USB充电",
     "brand": "JuicePro",
-    "imageUrl": "/images/portable-juicer.jpg"
+    "imageUrl": "/images/portable-juicer.jpg",
+    "inStock": false
   },
   {
     "id": 28,
     "name": "智能体温贴",
     "category": "健康",
-    "price": 59.0,
+    "price": 59,
     "stock": 200,
     "description": "24小时连续监测，蓝牙同步",
     "brand": "TempGuard",
-    "imageUrl": "/images/smart-temperature-patch.jpg"
+    "imageUrl": "/images/smart-temperature-patch.jpg",
+    "inStock": false
   },
   {
     "id": 29,
     "name": "电动剃毛器",
     "category": "个人护理",
-    "price": 49.0,
+    "price": 49,
     "stock": 90,
     "description": "全身防水，多角度剃毛，长效电池",
     "brand": "SmoothSkin",
-    "imageUrl": "/images/electric-epilator.jpg"
+    "imageUrl": "/images/electric-epilator.jpg",
+    "inStock": false
   },
   {
     "id": 30,
     "name": "智能香薰机",
     "category": "家居",
-    "price": 39.0,
+    "price": 39,
     "stock": 70,
     "description": "定时喷香，APP控制，多种香型",
     "brand": "AromaLife",
-    "imageUrl": "/images/smart-diffuser.jpg"
+    "imageUrl": "/images/smart-diffuser.jpg",
+    "inStock": false
   },
   {
     "id": 31,
     "name": "便携打印机",
     "category": "办公设备",
-    "price": 799.0,
+    "price": 799,
     "stock": 50,
     "description": "无线连接，彩色打印，手机直连",
     "brand": "PrintMini",
-    "imageUrl": "/images/portable-printer.jpg"
+    "imageUrl": "/images/portable-printer.jpg",
+    "inStock": false
   },
   {
     "id": 32,
     "name": "智能水杯",
     "category": "健康",
-    "price": 199.0,
+    "price": 199,
     "stock": 130,
     "description": "温度显示，喝水提醒，APP追踪",
     "brand": "HydroSmart",
-    "imageUrl": "/images/smart-water-bottle.jpg"
+    "imageUrl": "/images/smart-water-bottle.jpg",
+    "inStock": false
   },
   {
     "id": 33,
     "name": "电动剃毛刀",
     "category": "个人护理",
-    "price": 179.0,
+    "price": 179,
     "stock": 100,
     "description": "干湿两用，防水设计，长效电池",
     "brand": "SmoothTech",
-    "imageUrl": "/images/electric-body-groomer.jpg"
+    "imageUrl": "/images/electric-body-groomer.jpg",
+    "inStock": false
   },
   {
     "id": 34,
     "name": "智能垃圾桶",
     "category": "智能家居",
-    "price": 499.0,
+    "price": 499,
     "stock": 40,
     "description": "感应开盖，除臭，APP监控",
     "brand": "TrashSmart",
-    "imageUrl": "/images/smart-trash-can.jpg"
+    "imageUrl": "/images/smart-trash-can.jpg",
+    "inStock": false
   },
   {
     "id": 35,
     "name": "便携风扇",
     "category": "家居电器",
-    "price": 99.0,
+    "price": 99,
     "stock": 180,
     "description": "USB充电，三档风速，折叠便携",
     "brand": "CoolBreeze",
-    "imageUrl": "/images/portable-fan.jpg"
+    "imageUrl": "/images/portable-fan.jpg",
+    "inStock": false
   },
   {
     "id": 36,
     "name": "智能眼罩",
     "category": "健康",
-    "price": 249.0,
+    "price": 249,
     "stock": 80,
     "description": "助眠音乐，温度调节，蓝牙连接",
     "brand": "SleepMaster",
-    "imageUrl": "/images/smart-sleep-mask.jpg"
+    "imageUrl": "/images/smart-sleep-mask.jpg",
+    "inStock": false
   },
   {
     "id": 37,
     "name": "电动剃须刀清洁座",
     "category": "个人护理",
-    "price": 299.0,
+    "price": 299,
     "stock": 60,
     "description": "自动清洁，烘干，充电一体",
     "brand": "CleanShave",
-    "imageUrl": "/images/electric-shaver-cleaner.jpg"
+    "imageUrl": "/images/electric-shaver-cleaner.jpg",
+    "inStock": false
   },
   {
     "id": 38,
     "name": "智能花盆",
     "category": "智能家居",
-    "price": 399.0,
+    "price": 399,
     "stock": 70,
     "description": "自动浇水，光照监测，APP控制",
     "brand": "PlantSmart",
-    "imageUrl": "/images/smart-plant-pot.jpg"
+    "imageUrl": "/images/smart-plant-pot.jpg",
+    "inStock": false
   }
 ]
