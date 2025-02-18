@@ -10,135 +10,98 @@ const UI_METADATA_KEY = {
 interface BaseUIOptions {
   label?: string;
   order?: number;
+  visible?: boolean;
 }
 
-interface FormOptions extends BaseUIOptions {
-  placeholder?: string;
-  component?: 'input' | 'textarea' | 'select' | 'checkbox' | 'date';
-  options?: { value: string; label: string }[];
-  width?: 'full' | '1/2' | '1/3' | '1/4';
+interface ValidationOptions {
+  pattern?: string;
+  message?: string;
+  min?: number;
+  max?: number;
   required?: boolean;
-  validation?: {
-    pattern?: string;
-    message?: string;
-    min?: number;
-    max?: number;
-  };
 }
 
-interface TableOptions extends BaseUIOptions {
-  visible?: boolean;
-  width?: number;
-  sortable?: boolean;
-  filterable?: boolean;
+interface RenderOptions {
   render?: (value: any, record: any) => string | JSX.Element;
 }
 
-interface SearchOptions extends BaseUIOptions {
-  searchable?: boolean;
-  operator?: 'contains' | 'equals' | 'startsWith' | 'endsWith' | 'range';
-  component?: 'input' | 'select' | 'dateRange' | 'range';
+interface ComponentOptions {
+  component?: 'input' | 'textarea' | 'select' | 'checkbox' | 'date' | 'text' | 'tag' | 'image' | 'link' | 'dateRange' | 'range';
+  placeholder?: string;
   options?: { value: string; label: string }[];
-  type?: 'string' | 'number' | 'boolean' | 'date';
 }
 
-interface DetailOptions extends BaseUIOptions {
-  visible?: boolean;
-  component?: 'text' | 'tag' | 'image' | 'link';
-  render?: (value: any, record: any) => string | JSX.Element;
+interface UnifiedUIOptions extends BaseUIOptions {
+  form?: {
+    width?: 'full' | '1/2' | '1/3' | '1/4';
+    validation?: ValidationOptions;
+  } & ComponentOptions;
+
+  table?: {
+    width?: number;
+    sortable?: boolean;
+    filterable?: boolean;
+  } & RenderOptions;
+
+  search?: {
+    searchable?: boolean;
+    operator?: 'contains' | 'equals' | 'startsWith' | 'endsWith' | 'range';
+    type?: 'string' | 'number' | 'boolean' | 'date';
+  } & ComponentOptions;
+
+  detail?: RenderOptions & ComponentOptions;
 }
 
-const metadataCache = new WeakMap<object, {
-  form: Map<string, FormOptions>;
-  table: Map<string, TableOptions>;
-  search: Map<string, SearchOptions>;
-  detail: Map<string, DetailOptions>;
-}>();
+const metadataCache = new WeakMap<object, Map<string, UnifiedUIOptions>>();
 
-function createDecorator<T>(metadataKey: string) {
-  return function (options: T) {
-    return function (target: any, propertyKey: string) {
-      const cache = metadataCache.get(target) || {
-        form: new Map(),
-        table: new Map(),
-        search: new Map(),
-        detail: new Map()
-      };
+function createUIDecorator(options: UnifiedUIOptions) {
+  return function (target: any, propertyKey: string) {
+    let cache = metadataCache.get(target);
+    if (!cache) {
+      cache = new Map();
+      metadataCache.set(target, cache);
+    }
+    cache.set(propertyKey, options);
 
-      if (!metadataCache.has(target)) {
-        metadataCache.set(target, cache);
-      }
-
-      switch (metadataKey) {
-        case UI_METADATA_KEY.FORM:
-          cache.form.set(propertyKey, options as FormOptions);
-          break;
-        case UI_METADATA_KEY.TABLE:
-          cache.table.set(propertyKey, options as TableOptions);
-          break;
-        case UI_METADATA_KEY.SEARCH:
-          cache.search.set(propertyKey, options as SearchOptions);
-          break;
-        case UI_METADATA_KEY.DETAIL:
-          cache.detail.set(propertyKey, options as DetailOptions);
-          break;
-      }
-
-      Reflect.defineMetadata(metadataKey, options, target, propertyKey);
-    };
+    // Store metadata for each view type if specified
+    if (options.form) {
+      Reflect.defineMetadata(UI_METADATA_KEY.FORM, options.form, target, propertyKey);
+    }
+    if (options.table) {
+      Reflect.defineMetadata(UI_METADATA_KEY.TABLE, options.table, target, propertyKey);
+    }
+    if (options.search) {
+      Reflect.defineMetadata(UI_METADATA_KEY.SEARCH, options.search, target, propertyKey);
+    }
+    if (options.detail) {
+      Reflect.defineMetadata(UI_METADATA_KEY.DETAIL, options.detail, target, propertyKey);
+    }
   };
 }
 
-export const UIField = {
-  form: createDecorator<FormOptions>(UI_METADATA_KEY.FORM),
-  table: createDecorator<TableOptions>(UI_METADATA_KEY.TABLE),
-  search: createDecorator<SearchOptions>(UI_METADATA_KEY.SEARCH),
-  detail: createDecorator<DetailOptions>(UI_METADATA_KEY.DETAIL)
-};
+export const UIFields = createUIDecorator;
 
 export function getMetadata(entityClass: any, type: keyof typeof UI_METADATA_KEY) {
   const prototype = entityClass.prototype;
   const metadataKey = UI_METADATA_KEY[type];
   const cached = metadataCache.get(prototype);
 
-  if (cached) {
-    return Array.from(cached[type.toLowerCase()].entries())
-      //@ts-ignore
-      .map(([name, metadata]) => ({ name, metadata }))
-      //@ts-ignore
-      .sort((a, b) => (a.metadata.order || 0) - (b.metadata.order || 0));
+  if (!cached) {
+    return [];
   }
 
-  const metadata = new Map();
-  const cache = {
-    form: new Map(),
-    table: new Map(),
-    search: new Map(),
-    detail: new Map()
-  };
-  cache[type.toLowerCase()] = metadata;
-  metadataCache.set(prototype, cache);
-
-  const props = new Set<string>();
-  let currentPrototype = prototype;
-
-  while (currentPrototype && currentPrototype !== Object.prototype) {
-    Object.getOwnPropertyNames(currentPrototype).forEach(prop => props.add(prop));
-    currentPrototype = Object.getPrototypeOf(currentPrototype);
-  }
-
-  return Array.from(props)
-    .filter(prop => {
-      const meta = Reflect.getMetadata(metadataKey, prototype, prop);
-      if (meta) {
-        metadata.set(prop, meta);
-        return true;
+  return Array.from(cached.entries())
+    .filter(([_, options]) => options[type.toLowerCase()])
+    .map(([name, options]) => ({
+      name,
+      metadata: {
+        // Include root level properties
+        label: options.label,
+        order: options.order,
+        visible: options.visible,
+        // Merge with view-specific properties
+        ...options[type.toLowerCase()]
       }
-      return false;
-    })
-    .map(prop => ({
-      name: prop,
-      metadata: metadata.get(prop)
     }))
     .sort((a, b) => (a.metadata.order || 0) - (b.metadata.order || 0));
 }
