@@ -324,7 +324,6 @@ const DynamicTable = observer(
         </div>
         {remultStore && editingId && (
           <DynamicFormModal
-            entity={entity}
             remultStore={remultStore}
             onSuccess={handleEditSuccess}
           />

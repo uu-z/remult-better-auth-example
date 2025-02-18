@@ -61,7 +61,7 @@ const DynamicSearch = observer(
     return (
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Global Search */}
-        {(uiMetadata.searchFields || []).length > 0 && (
+        {(searchFields || []).length > 0 && (
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <svg

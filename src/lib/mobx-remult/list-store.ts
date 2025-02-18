@@ -73,14 +73,6 @@ export class ListStore<T extends IBaseEntity<T>> {
         const operator = key.endsWith('Min') ? '$gte' : '$lte';
         const convertedValue = fieldType === 'number' ? Number(value) : value;
 
-        // console.log('Range Query:', {
-        //   field: baseField,
-        //   type: fieldType,
-        //   operator,
-        //   value: convertedValue,
-        //   condition: { [baseField]: { [operator]: convertedValue } }
-        // });
-
         conditions.push({
           [baseField]: { [operator]: convertedValue }
         });
