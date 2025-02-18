@@ -1,6 +1,7 @@
 import React from "react";
 import { observer } from "mobx-react-lite";
 import { getMetadata } from "@/lib/decorators";
+import { getUIEntityMetadata } from "@/lib/ui-entity-decorator";
 import clsx from "clsx";
 import { ListStore } from "@/lib/mobx-remult/list-store";
 import { IBaseEntity } from "@/lib/mobx-remult/types";
@@ -12,6 +13,16 @@ interface DynamicTableProps<T extends IBaseEntity<T>> {
 
 const DynamicTable = observer(
   <T extends IBaseEntity<T>>({ entity, store }: DynamicTableProps<T>) => {
+    const uiMetadata = React.useMemo(
+      () => getUIEntityMetadata(entity),
+      [entity]
+    );
+    const dense = uiMetadata.layout?.list?.dense;
+    const selection = uiMetadata.layout?.list?.selection;
+    const rowActions = uiMetadata.layout?.list?.rowActions || [
+      "edit",
+      "delete",
+    ];
     const columns: any[] = React.useMemo(
       () => getMetadata(entity, "TABLE"),
       [entity]
@@ -69,14 +80,28 @@ const DynamicTable = observer(
             />
           </div>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-lg border border-gray-200">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                {selection && (
+                  <th className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300"
+                      onChange={(e) => {
+                        // TODO: Handle select all
+                      }}
+                    />
+                  </th>
+                )}
                 {columns.map(({ name, metadata }) => (
                   <th
                     key={name}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className={clsx(
+                      "text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
+                      dense ? "px-4 py-2" : "px-6 py-3"
+                    )}
                     style={{ width: metadata.width }}
                   >
                     <div className="flex items-center space-x-2">
@@ -106,41 +131,90 @@ const DynamicTable = observer(
                     )}
                   </th>
                 ))}
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                {rowActions?.length > 0 && (
+                  <th
+                    className={clsx(
+                      "text-right text-xs font-medium text-gray-500 uppercase tracking-wider",
+                      dense ? "px-4 py-2" : "px-6 py-3"
+                    )}
+                  >
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {store.state.data.map((item, index) => (
                 <tr
                   key={String(item.id) || String(index)}
-                  className="hover:bg-gray-50"
+                  className={clsx("hover:bg-gray-50", dense && "h-8")}
                 >
+                  {selection && (
+                    <td
+                      className={clsx(
+                        dense ? "px-4" : "px-6",
+                        "whitespace-nowrap"
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        className="rounded border-gray-300"
+                        onChange={(e) => {
+                          // TODO: Handle row selection
+                        }}
+                      />
+                    </td>
+                  )}
                   {columns.map(({ name, metadata }) => (
                     <td
                       key={name}
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                      className={clsx(
+                        "whitespace-nowrap text-sm text-gray-900",
+                        dense ? "px-4 py-2" : "px-6 py-4",
+                        "transition-colors hover:bg-gray-50"
+                      )}
                     >
                       {metadata.render
                         ? metadata.render(item[name], item)
                         : item[name]}
                     </td>
                   ))}
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => store.update(item.id, {})}
-                      className="text-blue-600 hover:text-blue-900 mr-4"
+                  {rowActions?.length > 0 && (
+                    <td
+                      className={clsx(
+                        "whitespace-nowrap text-right text-sm font-medium space-x-2",
+                        dense ? "px-4 py-2" : "px-6 py-4",
+                        "transition-colors hover:bg-gray-50"
+                      )}
                     >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => store.delete(item.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Delete
-                    </button>
-                  </td>
+                      {rowActions?.includes("view") && (
+                        <button
+                          onClick={() => {
+                            // TODO: Handle view action
+                          }}
+                          className="text-gray-600 hover:text-gray-900"
+                        >
+                          View
+                        </button>
+                      )}
+                      {rowActions?.includes("edit") && (
+                        <button
+                          onClick={() => store.update(item.id, {})}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          Edit
+                        </button>
+                      )}
+                      {rowActions?.includes("delete") && (
+                        <button
+                          onClick={() => store.delete(item.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -151,8 +225,8 @@ const DynamicTable = observer(
             </div>
           )}
         </div>
-        <div className="flex justify-between items-center mt-4">
-          <div className="text-sm text-gray-600">
+        <div className="flex justify-between items-center mt-4 px-4">
+          <div className="text-sm text-gray-500">
             Showing{" "}
             {Math.min(
               (store.queryOptions.page - 1) * store.queryOptions.pageSize + 1,
@@ -172,10 +246,10 @@ const DynamicTable = observer(
               }
               disabled={store.queryOptions.page <= 1}
               className={clsx(
-                "px-3 py-1 rounded border",
+                "px-3 py-2 rounded-md border shadow-sm transition-colors",
                 store.queryOptions.page <= 1
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-white text-gray-700 hover:bg-gray-50"
+                  ? "bg-gray-50 text-gray-400 cursor-not-allowed"
+                  : "bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               )}
             >
               Previous
@@ -192,10 +266,10 @@ const DynamicTable = observer(
                 key={pageNum}
                 onClick={() => store.setQuery({ page: pageNum })}
                 className={clsx(
-                  "px-3 py-1 rounded border",
+                  "px-3 py-2 rounded-md border shadow-sm transition-colors",
                   pageNum === store.queryOptions.page
-                    ? "bg-blue-600 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-50"
+                    ? "bg-blue-600 text-white border-transparent"
+                    : "bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 )}
               >
                 {pageNum}
@@ -210,11 +284,11 @@ const DynamicTable = observer(
                 Math.ceil(store.state.total / store.queryOptions.pageSize)
               }
               className={clsx(
-                "px-3 py-1 rounded border",
+                "px-3 py-2 rounded-md border shadow-sm transition-colors",
                 store.queryOptions.page >=
                   Math.ceil(store.state.total / store.queryOptions.pageSize)
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-white text-gray-700 hover:bg-gray-50"
+                  ? "bg-gray-50 text-gray-400 cursor-not-allowed"
+                  : "bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               )}
             >
               Next

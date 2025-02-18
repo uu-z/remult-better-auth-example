@@ -1,8 +1,62 @@
 import { Allow, Entity, Fields } from "remult"
 import { UIField } from "@/lib/decorators"
+import { UIEntity } from "@/lib/ui-entity-decorator"
 
 @Entity("products", {
     allowApiCrud: true
+})
+@UIEntity({
+    displayName: "Products",
+    description: "Manage product catalog and inventory",
+    icon: "ShoppingBag",
+    group: "Inventory",
+    menuOrder: 1,
+    defaultSort: { field: "createdAt", order: "desc" },
+    searchFields: ["name", "sku", "description"],
+    permissions: {
+        view: ["admin", "manager", "staff"],
+        create: ["admin", "manager"],
+        update: ["admin", "manager"],
+        delete: ["admin"]
+    },
+    layout: {
+        list: {
+            pageSize: 20,
+            dense: true,
+            selection: true,
+            rowActions: ["view", "edit", "delete"],
+            bulkActions: ["delete", "export"],
+            filters: {
+                position: "left",
+                collapsed: false
+            }
+        },
+        create: {
+            redirect: "list",
+            message: "Product created successfully"
+        },
+        edit: {
+            redirect: "list",
+            message: "Product updated successfully"
+        },
+        view: {
+            actions: ["edit", "delete"]
+        }
+    },
+    export: {
+        enabled: true,
+        formats: ["csv", "excel"],
+        fields: ["id", "sku", "name", "category", "price", "quantity"]
+    },
+    import: {
+        enabled: true,
+        template: true,
+        validation: true
+    },
+    analytics: {
+        enabled: true,
+        metrics: ["total", "outOfStock", "lowStock"]
+    }
 })
 export class Product {
     @Fields.autoIncrement()
