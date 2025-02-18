@@ -3,16 +3,17 @@ import { observer } from "mobx-react-lite";
 import { getMetadata } from "@/lib/decorators";
 import { getUIEntityMetadata } from "@/lib/ui-entity-decorator";
 import clsx from "clsx";
-import { ListStore } from "@/lib/mobx-remult/list-store";
+import { RemultStore } from "@/lib/mobx-remult/remult-store";
 import { IBaseEntity } from "@/lib/mobx-remult/types";
 
 interface DynamicSearchProps<T extends IBaseEntity<T>> {
-  entity: any;
-  store: ListStore<T>;
+  remultStore: RemultStore<T>;
 }
 
 const DynamicSearch = observer(
-  <T extends IBaseEntity<T>>({ entity, store }: DynamicSearchProps<T>) => {
+  <T extends IBaseEntity<T>>({ remultStore }: DynamicSearchProps<T>) => {
+    const entity = remultStore.entityType;
+    const store = remultStore.list;
     const searchFields: any[] = React.useMemo(
       () => getMetadata(entity, "SEARCH"),
       [entity]

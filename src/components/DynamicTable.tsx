@@ -3,16 +3,18 @@ import { observer } from "mobx-react-lite";
 import { getMetadata } from "@/lib/decorators";
 import { getUIEntityMetadata } from "@/lib/ui-entity-decorator";
 import clsx from "clsx";
-import { ListStore } from "@/lib/mobx-remult/list-store";
+import { RemultStore } from "@/lib/mobx-remult/remult-store";
 import { IBaseEntity } from "@/lib/mobx-remult/types";
+import DynamicFormModal from "./DynamicFormModal";
 
 interface DynamicTableProps<T extends IBaseEntity<T>> {
-  entity: any;
-  store: ListStore<T>;
+  remultStore?: RemultStore<T>;
 }
 
 const DynamicTable = observer(
-  <T extends IBaseEntity<T>>({ entity, store }: DynamicTableProps<T>) => {
+  <T extends IBaseEntity<T>>({ remultStore }: DynamicTableProps<T>) => {
+    const entity = remultStore?.entityType;
+    const store = remultStore?.list!;
     const uiMetadata = React.useMemo(
       () => getUIEntityMetadata(entity),
       [entity]
@@ -27,6 +29,31 @@ const DynamicTable = observer(
       () => getMetadata(entity, "TABLE"),
       [entity]
     );
+
+    const [editingId, setEditingId] = React.useState<number | null>(null);
+
+    React.useEffect(() => {
+      if (editingId) {
+        const item = store.state.data.find((item) => item.id === editingId);
+        if (item && remultStore) {
+          remultStore.form.initEdit(item);
+        }
+      }
+    }, [editingId, store.state.data, remultStore]);
+
+    const handleEditClick = (id: number) => {
+      setEditingId(id);
+    };
+
+    const handleEditClose = () => {
+      setEditingId(null);
+      remultStore?.form.resetForm();
+    };
+
+    const handleEditSuccess = () => {
+      setEditingId(null);
+      store.list();
+    };
 
     const handleSort = (field: string) => {
       const currentOrderBy = store.queryOptions.orderBy as Record<string, any>;
@@ -199,7 +226,7 @@ const DynamicTable = observer(
                       )}
                       {rowActions?.includes("edit") && (
                         <button
-                          onClick={() => store.update(item.id, {})}
+                          onClick={() => handleEditClick(Number(item.id))}
                           className="text-blue-600 hover:text-blue-900"
                         >
                           Edit
@@ -295,6 +322,13 @@ const DynamicTable = observer(
             </button>
           </div>
         </div>
+        {remultStore && editingId && (
+          <DynamicFormModal
+            entity={entity}
+            remultStore={remultStore}
+            onSuccess={handleEditSuccess}
+          />
+        )}
       </div>
     );
   }

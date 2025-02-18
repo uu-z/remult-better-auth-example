@@ -4,7 +4,7 @@ import { Repository, remult } from 'remult';
 export class BaseStore<T extends IBaseEntity<T>> {
   public static instances = new Map<EntityType<any>, BaseStore<any>>();
 
-  protected constructor(protected repository: Repository<T>, protected entityType: EntityType<T>) {
+  protected constructor(public repository: Repository<T>, public entityType: EntityType<T>) {
     return new Proxy(this, {
       get: (target, prop) => {
         if (prop in target) {

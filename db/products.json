@@ -3,7 +3,7 @@
     "id": 1,
     "name": "智能蓝牙耳机",
     "category": "电子产品",
-    "price": 299.99,
+    "price": 199,
     "stock": 150,
     "description": "降噪无线蓝牙耳机，支持触控操作和长续航",
     "brand": "TechWave",
@@ -402,5 +402,13 @@
     "price": 1,
     "inStock": true,
     "id": 39
+  },
+  {
+    "name": "test",
+    "description": "test",
+    "category": "健康",
+    "price": 233,
+    "inStock": true,
+    "id": 40
   }
 ]

@@ -30,7 +30,7 @@ export class ListStore<T extends IBaseEntity<T>> {
   }
 
   buildQuery(options?: IQueryOptions<T>) {
-    const { page = 1, pageSize = 10, searchText, where, orderBy, ...rest } = options!
+    const { page = 1, pageSize = 10, searchText, where, orderBy, ...rest } = options || this.queryOptions
 
     const query: FindOptions<T> = {
       where,

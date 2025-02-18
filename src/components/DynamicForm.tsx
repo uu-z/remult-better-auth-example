@@ -4,6 +4,7 @@ import { getMetadata } from "@/lib/decorators";
 import clsx from "clsx";
 import { FormStore } from "@/lib/mobx-remult/form-store";
 import { IBaseEntity } from "@/lib/mobx-remult/types";
+import { RemultStore } from "@/lib/mobx-remult/remult-store";
 
 interface FormFieldProps {
   name: string;
@@ -89,11 +90,17 @@ const FormField = observer(
 
 interface DynamicFormProps<T extends IBaseEntity<T>> {
   entity: any;
-  store: FormStore<T>;
+  remultStore: RemultStore<T>;
+  onSuccess?: () => void;
 }
 
 const DynamicForm = observer(
-  <T extends IBaseEntity<T>>({ entity, store }: DynamicFormProps<T>) => {
+  <T extends IBaseEntity<T>>({
+    remultStore,
+    onSuccess,
+  }: DynamicFormProps<T>) => {
+    const entity = remultStore.entityType;
+    const store = remultStore.form;
     const { data: formData, errors, saving, setField, submit } = store.use();
     const fields: any[] = React.useMemo(
       () => getMetadata(entity, "FORM"),
@@ -106,7 +113,10 @@ const DynamicForm = observer(
 
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      await submit(e);
+      const result = await submit(e);
+      if (result) {
+        onSuccess?.();
+      }
     };
 
     return (
