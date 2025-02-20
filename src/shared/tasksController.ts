@@ -1,8 +1,6 @@
-import { Allow, BackendMethod } from "remult";
+import { Allow, BackendMethod, remult } from "remult";
 import { Task } from "./task";
-import { memoryAdapter } from "@/lib/remult-memory";
 
-const remult = memoryAdapter()
 
 
 export class TasksController {

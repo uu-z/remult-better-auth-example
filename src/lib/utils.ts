@@ -38,7 +38,6 @@ export class ObjectPool {
 const cache = new WeakMap()
 
 export function WeakWrap<T extends object, R>(object: T, factory: () => R): R {
-    console.log(object, cache.has(object))
     if (!cache.has(object)) {
         cache.set(object, factory());
     }

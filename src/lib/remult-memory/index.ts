@@ -11,9 +11,10 @@ import {
     ClassType,
     remult,
     LiveQuery,
+    Remult,
 } from 'remult';
-import { ObjectPool } from '../utils';
-import { useLiveQuery } from './live-query';
+import { ObjectPool, WeakWrap } from '../utils';
+import { useAsyncQuery, useLiveQuery } from './live-query';
 
 
 
@@ -219,13 +220,61 @@ class RemultRepo<T> implements Repository<T> {
 // const remultContext = new Remult();
 const db = new MemoryDB();
 
-export function memoryAdapter() {
+export function memoryAdapter(): Remult {
     return {
+        //@ts-ignore
+        adapter: "memory",
         ...remult,
         repo: <T>(entity: ClassType<T>) => {
             // const repository = remultContext.repo(entity);
             const key = entity.name.toLowerCase();
             return ObjectPool.get(key, () => new RemultRepo<T>(key, db, {}))
         },
+    }
+}
+export function httpAdapter(): Remult {
+    //@ts-ignore
+    return { adapter: "http", ...remult }
+}
+
+type QueryResult<T> = {
+    data: T
+    loading: boolean
+    error: any
+}
+
+type WrapWithQueryResult<T> = T extends Promise<infer R> ? QueryResult<R> : never
+
+type RepositoryMethodsOnly<T> = {
+    [K in keyof Repository<T>]: Repository<T>[K] extends (...args: any[]) => any
+    ? (...args: Parameters<Repository<T>[K]>) => WrapWithQueryResult<ReturnType<Repository<T>[K]>>
+    : never
+}
+
+export function liveProxy(args: { adapter: Remult & { adapter?: string } }) {
+    return {
+        repo: <T>(entity: ClassType<T>): RepositoryMethodsOnly<T> => {
+            const repo = args.adapter.repo(entity)
+
+            if (args.adapter.adapter == "memory") {
+                //@ts-ignore
+                return new Proxy(repo, {
+                    get(target, prop: keyof Repository<T>) {
+                        //@ts-ignore
+                        return (...args: any[]) => useLiveQuery(() => target[prop](...args))
+                    }
+                }) as RepositoryMethodsOnly<T>
+            }
+            if (args.adapter.adapter == "http") {
+                //@ts-ignore
+                return new Proxy(repo, {
+                    get(target, prop: keyof Repository<T>) {
+                        //@ts-ignore
+                        return (...args: any[]) => useAsyncQuery(() => target[prop](...args))
+                    }
+                }) as RepositoryMethodsOnly<T>
+            }
+            throw new Error("not support adapter")
+        }
     }
 }

@@ -5,15 +5,21 @@ import { Task } from "../shared/task";
 import { TasksController } from "../shared/tasksController";
 import { authClient } from "@/lib/client";
 import { observer } from "mobx-react-lite";
-import { memoryAdapter } from "@/lib/remult-memory";
+import { memoryAdapter, liveProxy } from "@/lib/remult-memory";
 
-const _remult = memoryAdapter();
+// const _remult = httpAdapter();  // for http & backend
+const _remult = memoryAdapter(); // for pure frontend & memory
+
+const liveClient = liveProxy({
+  adapter: _remult,
+});
 
 const Page = observer(() => {
   const session = authClient.useSession();
   const user = session.data?.user;
 
-  const { data: tasks } = _remult.repo(Task).liveQuery({});
+  const { data: tasks } = liveClient.repo(Task).find(); // call frontend memory
+  const { data: count } = liveClient.repo(Task).count();
 
   useEffect(() => {
     setInterval(() => {
@@ -22,7 +28,7 @@ const Page = observer(() => {
   }, []);
 
   useEffect(() => {
-    _remult.user = {
+    remult.user = {
       ...session.data?.user,
       roles: [session.data?.user.role],
     } as UserInfo;
