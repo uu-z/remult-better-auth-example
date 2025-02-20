@@ -1,32 +1,28 @@
 "use client";
 import { useEffect } from "react";
-import { UserInfo, remult } from "remult";
+import { remult, UserInfo } from "remult";
 import { Task } from "../shared/task";
 import { TasksController } from "../shared/tasksController";
 import { authClient } from "@/lib/client";
-import { RemultStore } from "@/lib/mobx-remult/remult-store";
 import { observer } from "mobx-react-lite";
-import { BetterAuthProxy } from "@/lib/mobx-better-auth";
+import { memoryAdapter } from "@/lib/remult-memory";
 
-const taskStore = RemultStore.Get(Task);
-const auth = BetterAuthProxy(authClient);
+const _remult = memoryAdapter();
 
 const Page = observer(() => {
   const session = authClient.useSession();
   const user = session.data?.user;
-  const form = taskStore.form.use();
 
-  const users = auth.listSessions.use({});
-  //@ts-ignore
-  const listUsers = auth.admin.listUsers.use();
-
-  const { data: tasks } = taskStore.list.useList({
-    live: true,
-    where: { completed: undefined },
-  });
+  const { data: tasks } = _remult.repo(Task).liveQuery({});
 
   useEffect(() => {
-    remult.user = {
+    setInterval(() => {
+      _remult.repo(Task).insert({ title: "test" });
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    _remult.user = {
       ...session.data?.user,
       roles: [session.data?.user.role],
     } as UserInfo;
@@ -39,8 +35,8 @@ const Page = observer(() => {
           <h1 className="text-2xl font-bold text-primary-700 dark:text-primary-300">
             Todo List
           </h1>
-          <pre>{JSON.stringify(users, null, 2)}</pre>
-          <pre>{JSON.stringify(listUsers.data?.users, null, 2)}</pre>
+          {/* <pre>{JSON.stringify(users, null, 2)}</pre>
+          <pre>{JSON.stringify(listUsers.data?.users, null, 2)}</pre> */}
 
           <div className="mt-4 flex justify-between items-center">
             <p className="text-gray-600 dark:text-gray-300">
@@ -64,7 +60,7 @@ const Page = observer(() => {
           </div>
         </div>
 
-        {taskStore.metadata.apiInsertAllowed() && (
+        {/* {remult.repo(Task).metadata.apiInsertAllowed() && (
           <form
             onSubmit={form.submit}
             className="p-6 border-b border-gray-200 dark:border-gray-700"
@@ -90,7 +86,7 @@ const Page = observer(() => {
               </div>
             ))}
           </form>
-        )}
+        )} */}
 
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
           {tasks?.map((task) => (
@@ -103,7 +99,7 @@ const Page = observer(() => {
                 className="mr-3 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                 checked={task.completed}
                 onChange={(e) => {
-                  taskStore.list.update(task.id, {
+                  _remult.repo(Task).update(task.id, {
                     completed: e.target.checked,
                   });
                 }}
@@ -112,12 +108,13 @@ const Page = observer(() => {
                 className="input flex-grow mr-3"
                 value={task.title}
                 onChange={(e) => {
-                  taskStore.list.update(task.id, { title: e.target.value });
+                  _remult.repo(Task).update(task.id, { title: e.target.value });
+                  // remult.repo(Task).list.update(task.id, { title: e.target.value });
                 }}
               />
-              {taskStore.metadata.apiDeleteAllowed() && (
+              {remult.repo(Task).metadata.apiDeleteAllowed() && (
                 <button
-                  onClick={() => taskStore.list.delete(task.id)}
+                  onClick={() => _remult.repo(Task).delete(task.id)}
                   className="btn btn-outline text-red-500 hover:bg-red-50"
                 >
                   Delete
