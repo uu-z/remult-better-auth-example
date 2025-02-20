@@ -265,16 +265,13 @@ export function liveProxy(args: { adapter: Remult & { adapter?: string } }) {
                     }
                 }) as RepositoryMethodsOnly<T>
             }
-            if (args.adapter.adapter == "http") {
-                //@ts-ignore
-                return new Proxy(repo, {
-                    get(target, prop: keyof Repository<T>) {
-                        //@ts-ignore
-                        return (...args: any[]) => useAsyncQuery(() => target[prop](...args))
-                    }
-                }) as RepositoryMethodsOnly<T>
-            }
-            throw new Error("not support adapter")
+            //@ts-ignore
+            return new Proxy(repo, {
+                get(target, prop: keyof Repository<T>) {
+                    //@ts-ignore
+                    return (...args: any[]) => useAsyncQuery(() => target[prop](...args))
+                }
+            }) as RepositoryMethodsOnly<T>
         }
     }
 }

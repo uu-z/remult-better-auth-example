@@ -7,7 +7,7 @@ import { authClient } from "@/lib/client";
 import { observer } from "mobx-react-lite";
 import { memoryAdapter, liveProxy } from "@/lib/remult-memory";
 
-// const _remult = httpAdapter();  // for http & backend
+// const _remult = remult;  // for http & backend
 const _remult = memoryAdapter(); // for pure frontend & memory
 
 const liveClient = liveProxy({
